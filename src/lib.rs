@@ -1360,9 +1360,7 @@ fn compile_effects(
                 // Check if asset is available, otherwise silently ignore as we can't check for
                 // changes, and conceptually it makes no sense to render a particle effect whose
                 // asset was unloaded.
-                let Some(asset) = effects.get(&effect.handle) else {
-                    return None;
-                };
+                let asset = effects.get(&effect.handle)?;
 
                 Some((asset, entity, effect, compiled_effect))
             })

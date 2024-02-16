@@ -4,6 +4,7 @@
 use bevy::render::renderer::{RenderDevice, RenderQueue};
 
 use bevy::prelude::{Quat, Vec2, Vec3, Vec4};
+use wgpu::InstanceFlags;
 use std::ops::Sub;
 
 /// Utility trait to compare floating-point values with a tolerance.
@@ -154,6 +155,8 @@ impl MockRenderer {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::PRIMARY,
             dx12_shader_compiler: wgpu::Dx12Compiler::default(),
+            flags: InstanceFlags::empty(),
+            gles_minor_version: wgpu::Gles3MinorVersion::Automatic,
         });
         let adapter =
             futures::executor::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
@@ -169,10 +172,10 @@ impl MockRenderer {
                 label: None,
                 // Request MAPPABLE_PRIMARY_BUFFERS to allow MAP_WRITE|COPY_DST.
                 // FIXME - Should use a separate buffer from primary to support more platforms.
-                features: wgpu::Features::MAPPABLE_PRIMARY_BUFFERS,
+                required_features: wgpu::Features::MAPPABLE_PRIMARY_BUFFERS,
                 // Request downlevel_defaults() for maximum compatibility in testing. The actual
                 // Hanabi library uses the default requested mode of the app.
-                limits: wgpu::Limits::downlevel_defaults(),
+                required_limits: wgpu::Limits::downlevel_defaults(),
             },
             None,
         ))

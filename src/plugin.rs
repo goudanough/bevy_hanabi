@@ -31,19 +31,27 @@ use crate::{
 
 pub mod main_graph {
     pub mod node {
-        /// Label for the simulation driver node running the simulation graph.
-        pub const HANABI: &str = "hanabi_driver_node";
+        use bevy::render::render_graph::RenderLabel;
+
+        #[derive(RenderLabel, Hash, Debug, PartialEq, Eq, Clone)]
+        pub struct Hanabi;
     }
 }
 
 pub mod simulate_graph {
-    /// Name of the simulation sub-graph.
-    pub const NAME: &str = "hanabi_simulate_graph";
+    use bevy::render::render_graph::RenderSubGraph;
+
+    #[derive(RenderSubGraph, Hash, Debug, PartialEq, Eq, Clone)]
+    pub struct Label;
 
     pub mod node {
+        use bevy::render::render_graph::RenderLabel;
+
         /// Label for the simulation node (init and update compute passes;
         /// view-independent).
-        pub const SIMULATE: &str = "hanabi_simulate_node";
+
+        #[derive(RenderLabel, Hash, Debug, PartialEq, Eq, Clone)]
+        pub struct Simulate;
     }
 }
 
@@ -229,17 +237,17 @@ impl Plugin for HanabiPlugin {
         // how many cameras/views are active (view-independent).
         let mut simulate_graph = RenderGraph::default();
         let simulate_node = VfxSimulateNode::new(&mut render_app.world);
-        simulate_graph.add_node(simulate_graph::node::SIMULATE, simulate_node);
+        simulate_graph.add_node(simulate_graph::node::Simulate, simulate_node);
         let mut graph = render_app.world.get_resource_mut::<RenderGraph>().unwrap();
-        graph.add_sub_graph(simulate_graph::NAME, simulate_graph);
+        graph.add_sub_graph(simulate_graph::Label, simulate_graph);
 
         // Add the simulation driver node which executes the simulation sub-graph. It
         // runs before the camera driver, since rendering needs to access simulated
         // particles.
-        graph.add_node(main_graph::node::HANABI, VfxSimulateDriverNode {});
+        graph.add_node(main_graph::node::Hanabi, VfxSimulateDriverNode {});
         graph.add_node_edge(
-            main_graph::node::HANABI,
-            bevy::render::main_graph::node::CAMERA_DRIVER,
+            main_graph::node::Hanabi,
+            bevy::render::graph::CameraDriverLabel
         );
     }
 }
